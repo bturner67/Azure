@@ -1,0 +1,515 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "resourcegroup": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "subscriptionId": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "workspace": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "workspaceapiversion": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "[parameters('workspaceapiversion')]",
+            "name": "[parameters('workspace')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "location": "[parameters('location')]",
+            "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]",
+            "resources": [
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "name": "ATQ Max Perf Values",
+                    "type": "views",
+                    "location": "[parameters('location')]",
+                    "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'),'/views/ATQ Max Perf Values')]",
+                    "dependson": [
+                        "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]"
+                    ],
+                    "properties": {
+                        "Id": "ATQ Max Perf Values",
+                        "Name": "ATQ Max Perf Values",
+                        "Author": null,
+                        "Source": "Local",
+                        "Version": 2,
+                        "Dashboard": [
+                            {
+                                "Id": "LineChartBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Top 6 ATQ Thread Count Totals in CST ",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "ATQ Threads Top 6 Servers",
+                                        "Subtitle": ""
+                                    },
+                                    "LineChart": {
+                                        "Query": "let perfData=Perf | where CounterName == 'ATQ Threads Total' | summarize max(CounterValue) by Computer; let Top6Computers = perfData | top 6 by max_CounterValue |project Computer; let top6Graph = perfData |where Computer in (Top6Computers); Perf | where Computer in (top6Graph) | where CounterName == 'ATQ Threads Total' | summarize max(CounterValue) by bin(TimeGenerated ,1h), Computer | sort by max_CounterValue desc",
+                                        "yAxis": {
+                                            "isLogarithmic": false,
+                                            "units": {
+                                                "baseUnitType": "Count",
+                                                "baseUnit": "Ones",
+                                                "displayUnit": "AUTO"
+                                            },
+                                            "customLabel": "ATQ Threads"
+                                        },
+                                        "NavigationSelect": {
+                                            "NavigationQuery": ""
+                                        }
+                                    },
+                                    "List": {
+                                        "Query": "let perfData=Perf | where CounterName == 'ATQ Threads Total' | summarize max(CounterValue) by Computer; let Top6Computers=perfData |distinct Computer,max_CounterValue | top 6 by max_CounterValue |project Computer; let top6Graph = perfData |where Computer in (Top6Computers) | sort by max_CounterValue; top6Graph",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "ColumnsTitle": {
+                                            "Name": "Servers",
+                                            "Value": "ATQ Thread Max Count"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": true,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#00b294",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "250",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "255",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "SecurityEvent |where EventID == 4624 or EventID == 4625 or EventID == 4768 or EventID == 4769 or EventID == 4771 or EventID == 4776 |where {selected item} |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |parse EventData with * 'IpAddress\">' CustomIpAddress '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName), IpAdd = iif((IpAddress == \"\"),CustomIpAddress, IpAddress) |summarize count() by CustTargetUN,Activity, Computer, FromWorkstation=Workstation, FromIpAddress=IpAdd |sort by count_ desc, CustTargetUN",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "SecurityEvent |where EventID == 4624 or EventID == 4625 or EventID == 4768 or EventID == 4769 or EventID == 4771 or EventID == 4776 |where {selected item} |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |parse EventData with * 'IpAddress\">' CustomIpAddress '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName), IpAdd = iif((IpAddress == \"\"),CustomIpAddress, IpAddress) |summarize count() by CustTargetUN,Activity, Computer, FromWorkstation=Workstation, FromIpAddress=IpAdd |sort by count_ desc, CustTargetUN"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "ATQ Outstanding Queue Requests in CST ",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Top 6 Queue values",
+                                        "Subtitle": ""
+                                    },
+                                    "LineChart": {
+                                        "Query": "let perfData=Perf | where CounterName == 'ATQ Outstanding Queued Requests' | summarize max(CounterValue) by bin(TimeGenerated, 1h), Computer; let Top6Computers=perfData |distinct Computer, max_CounterValue | top 6 by max_CounterValue  |project Computer; let top6Graph = perfData  |where Computer in (Top6Computers); top6Graph | sort by max_CounterValue",
+                                        "Callout": {
+                                            "Title": "Max Queue",
+                                            "Series": "",
+                                            "Operation": "Max"
+                                        },
+                                        "yAxis": {
+                                            "isLogarithmic": false,
+                                            "units": {
+                                                "baseUnitType": "Count",
+                                                "baseUnit": "Ones",
+                                                "displayUnit": "AUTO"
+                                            },
+                                            "customLabel": "Queue Value"
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "let perfData=Perf | where CounterName == 'ATQ Outstanding Queued Requests' | summarize max(CounterValue) by Computer; let Top6Computers=perfData |distinct Computer,max_CounterValue | top 6 by max_CounterValue  |project Computer; let top6Graph = perfData  |where Computer in (Top6Computers) | sort by max_CounterValue desc; top6Graph",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Count",
+                                        "ColumnsTitle": {
+                                            "Name": "Server",
+                                            "Value": "ATQ Outstanding Queue Max Count"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": true,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "3",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "5",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "SecurityEvent |where EventID == 4624 or EventID == 4625 or EventID == 4768 or EventID == 4769 or EventID == 4771 or EventID == 4776 |where  {selected item} |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |parse EventData with * 'IpAddress\">' CustomIpAddress '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName), IpAdd = iif((IpAddress == \"\"),CustomIpAddress, IpAddress) |summarize count() by CustTargetUN,Activity, Computer, Workstation, IpAdd |sort by count_ desc, CustTargetUN",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "SecurityEvent |where EventID == 4624 or EventID == 4625 or EventID == 4768 or EventID == 4769 or EventID == 4771 or EventID == 4776 |where  {selected item} |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |parse EventData with * 'IpAddress\">' CustomIpAddress '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName), IpAdd = iif((IpAddress == \"\"),CustomIpAddress, IpAddress) |summarize count() by CustTargetUN,Activity, Computer, Workstation, IpAdd |sort by count_ desc, CustTargetUN"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "SingleQueryDonutBuilderBladeV1",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Top Log On Failures event 4625",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Top Failures",
+                                        "Subtitle": ""
+                                    },
+                                    "Donut": {
+                                        "Query": "SecurityEvent | where EventID == 4625 |summarize count() by TargetUserName | top 10 by count_ desc",
+                                        "CenterLegend": {
+                                            "Text": "Total",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#00188f",
+                                                "#ff8c00",
+                                                "#e2e584"
+                                            ],
+                                            "valueColorMapping": []
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "SecurityEvent | where EventID == 4625 |summarize count() by TargetUserName |sort by count_ desc nulls first ",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "ColumnsTitle": {
+                                            "Name": "UserName",
+                                            "Value": "Failure Count"
+                                        },
+                                        "Color": "#0072c6",
+                                        "operation": "Count",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "SecurityEvent |where EventID == 4625 |where {selected item} |summarize count() by TargetAccount, Computer, FromIpAddress=IpAddress |sort by count_ desc, TargetAccount",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "SecurityEvent |where EventID == 4625 |where {selected item} |summarize count() by TargetAccount, Computer, FromIpAddress=IpAddress |sort by count_ desc, TargetAccount"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "SingleQueryDonutBuilderBladeV1",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Top Kerberos Failures Event 4771",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Failure Count",
+                                        "Subtitle": ""
+                                    },
+                                    "Donut": {
+                                        "Query": "SecurityEvent | where EventID == 4771 | summarize count() by TargetUserName | top 10 by count_ desc",
+                                        "CenterLegend": {
+                                            "Text": "Total",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#00188f",
+                                                "#fff100",
+                                                "#e2e584"
+                                            ],
+                                            "valueColorMapping": []
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "SecurityEvent | where EventID == 4771 |summarize count() by TargetUserName |sort by count_ desc nulls first",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                            "Name": "UserName",
+                                            "Value": "Failure Count"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "SecurityEvent |where EventID == 4771 |where {selected item} |summarize count() by TargetAccount, Computer, FromIpAddress=IpAddress |sort by count_ desc",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "SecurityEvent |where EventID == 4771 |where {selected item} |summarize count() by TargetAccount, Computer, FromIpAddress=IpAddress |sort by count_ desc"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "SingleQueryDonutBuilderBladeV1",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Top NTLM Authentications Event ID 4776",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "--",
+                                        "Subtitle": ""
+                                    },
+                                    "Donut": {
+                                        "Query": "SecurityEvent | where EventID == 4776 | summarize count() by TargetUserName | top 10 by count_ desc",
+                                        "CenterLegend": {
+                                            "Text": "Total",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#00188f",
+                                                "#fff100",
+                                                "#ff8c00"
+                                            ],
+                                            "valueColorMapping": []
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "SecurityEvent | where EventID == 4776 |summarize count() by TargetUserName |sort by count_ desc nulls first",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                            "Name": "UserName",
+                                            "Value": "NTLM Auths"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "SecurityEvent |where EventID == 4776 |where {selected item}  |summarize count() by TargetAccount, Computer, FromWorkstation=Workstation, IpAddress |sort by count_ desc",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "SecurityEvent |where EventID == 4776 |where {selected item}  |summarize count() by TargetAccount, Computer, FromWorkstation=Workstation, IpAddress |sort by count_ desc"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "SingleQueryDonutBuilderBladeV1",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Top Kerberos Auths Event ID 4768 and 4769",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Kerberos Count",
+                                        "Subtitle": ""
+                                    },
+                                    "Donut": {
+                                        "Query": "SecurityEvent |where EventID == 4768 or EventID == 4769 |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName) |summarize count() by CustTargetUN |sort by count_ desc | top 10 by count_ desc",
+                                        "CenterLegend": {
+                                            "Text": "Total",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#00188f",
+                                                "#fff100",
+                                                "#dd5900"
+                                            ],
+                                            "valueColorMapping": []
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "SecurityEvent |where EventID == 4768 or EventID == 4769 |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName) |summarize count() by CustTargetUN |sort by count_ desc | top 10 by count_ desc",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                            "Name": "Computer",
+                                            "Value": "Count"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "SecurityEvent |where EventID == 4768 or EventID == 4769 |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |parse EventData with * 'IpAddress\">' CustomIpAddress '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName), FromIpAdd = iif((IpAddress == \"\"),CustomIpAddress, IpAddress) | where {selected item} |summarize count() by CustTargetUN,Activity,Computer, FromIpAdd |sort by count_ desc | top 10 by count_ desc",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "SecurityEvent |where EventID == 4768 or EventID == 4769 |parse EventData with * 'TargetUserName\">' CustomTargetUserName '</Data>' * |parse EventData with * 'IpAddress\">' CustomIpAddress '</Data>' * |extend CustTargetUN = iif((TargetAccount == \"\"),CustomTargetUserName, TargetUserName), FromIpAdd = iif((IpAddress == \"\"),CustomIpAddress, IpAddress) | where {selected item} |summarize count() by CustTargetUN,Activity,Computer, FromIpAdd |sort by count_ desc | top 10 by count_ desc"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "Filters": [],
+                        "OverviewTile": {
+                            "Id": "DoubleNumberBuilderTile",
+                            "Type": "OverviewTile",
+                            "Version": 2,
+                            "Configuration": {
+                                "TileOne": {
+                                    "Legend": "ATQ Total Threads MAX Top Server",
+                                    "Query": "Perf | where CounterName == 'ATQ Threads Total' | summarize Counter=max(CounterValue) by Computer | top 1 by Counter |project Counter"
+                                },
+                                "TileTwo": {
+                                    "Legend": "ATQ Queue MAX Top Server",
+                                    "Query": "Perf  | where CounterName == 'ATQ Outstanding Queued Requests' | summarize Counter=max(CounterValue) by Computer | top 1 by Counter |project Counter"
+                                },
+                                "Advanced": {
+                                    "DataFlowVerification": {
+                                        "Enabled": false,
+                                        "Query": "search * | limit 1 | project TimeGenerated",
+                                        "Message": ""
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
